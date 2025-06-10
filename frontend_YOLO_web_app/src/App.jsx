@@ -45,6 +45,18 @@ function App() {
     socket.emit("select_camera", { camera: cam });
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      // Send image as base64 string to backend via socket
+      const base64Image = reader.result.split(',')[1]; // Remove data:image/...;base64,
+      socket.emit("upload_image", { image: base64Image });
+    };
+    reader.readAsDataURL(file);
+};
+
   return (
     <>
       <h1 className="my-8 text-4xl">Yolo Object Detection</h1>
@@ -73,10 +85,15 @@ function App() {
       )}
 
       <div id="btn-container" className="container flex justify-around">
-        <button className="btn" disabled>
+        <label className="btn cursor-pointer">
           Open Image
-          <input type="file" accept="image/*" hidden />
-        </button>
+          <input
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={handleImageUpload}
+          />
+        </label>
 
         <button className="btn" disabled>
           Open Camera
